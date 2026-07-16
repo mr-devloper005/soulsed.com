@@ -1,5 +1,8 @@
 import { slot4BrandConfig } from '@/editable/theme/brand.config'
 
+export const uiHiddenTaskKeys = ['profile'] as const
+export const isUiHiddenTask = (key: string) => (uiHiddenTaskKeys as readonly string[]).includes(key)
+
 export const globalContent = {
   site: {
     name: slot4BrandConfig.siteName,
@@ -8,11 +11,9 @@ export const globalContent = {
     baseUrl: slot4BrandConfig.baseUrl,
   },
   nav: {
-    tagline: 'Independent reading platform',
+    tagline: 'Collections · Members',
     primaryLinks: [
-      { label: 'Articles', href: '/articles' },
-      { label: 'Visuals', href: '/image-sharing' },
-      { label: 'Listings', href: '/listings' },
+      { label: 'About', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
     actions: {
@@ -21,16 +22,16 @@ export const globalContent = {
     },
   },
   footer: {
-    tagline: 'Stories, resources, and discoverable posts',
-    description: 'A connected publishing surface for articles, visuals, listings, profiles, bookmarks, and downloadable resources.',
+    tagline: 'Collections · Members',
+    description: 'A considered index of bookmarks, tools, references, and resources worth returning to.',
     columns: [
       {
-        title: 'Explore',
+        title: 'Collections',
         links: [
-          { label: 'Articles', href: '/articles' },
-          { label: 'Listings', href: '/listings' },
-          { label: 'Images', href: '/image-sharing' },
-          { label: 'PDF Library', href: '/pdf' },
+          { label: 'All collections', href: '/sbm' },
+          { label: 'Design', href: '/sbm?category=design' },
+          { label: 'Technology', href: '/sbm?category=technology' },
+          { label: 'Learning', href: '/sbm?category=learning' },
         ],
       },
       {

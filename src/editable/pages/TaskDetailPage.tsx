@@ -8,6 +8,7 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { EditableArticleComments } from '@/editable/components/EditableArticleComments'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads, getSlotSizes } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -62,6 +63,7 @@ const escapeHtml = (value: string) => value
   .replace(/'/g, '&#39;')
 
 const safeUrl = (value: string) => /^https?:\/\//i.test(value) ? value : '#'
+const pickRandom = (sizes: string[]) => sizes[Math.floor(Math.random() * sizes.length)]
 
 const linkifyMarkdown = (value: string) => value
   .replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/gi, (_match, label, url) => `<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>`)
@@ -322,22 +324,14 @@ function ImageDetail({ post, related }: { post: SitePost; related: SitePost[] })
 // ----- Bookmark: a single curated resource -----
 function BookmarkDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
   const website = getField(post, ['website', 'url', 'link'])
+  const domain = website.replace(/^https?:\/\//, '').split('/')[0] || 'Resource'
+  const collection = categoryOf(post, 'General collection')
   return (
     <>
-      <article className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
-        <BackLink task="sbm" />
-        <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]"><Bookmark className="h-7 w-7" /></div>
-        <div className="mt-6"><Kicker task="sbm">Saved resource</Kicker></div>
-        <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
-        {leadText(post) ? <p className="mt-6 text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
-        {website ? (
-          <Link href={website} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">
-            Open resource <ExternalLink className="h-4 w-4" />
-          </Link>
-        ) : null}
-        <BodyContent post={post} />
-      </article>
-      <RelatedStrip task="sbm" related={related} />
+      <header className="border-b border-black bg-black text-white"><div className="mx-auto grid max-w-[var(--editable-container)] gap-10 px-6 py-16 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/55">Collection / {collection}</p><h1 className="editable-display mt-6 max-w-5xl text-5xl font-semibold leading-[.88] tracking-[-.07em] sm:text-7xl">{post.title}</h1></div><div className="border-t border-white/25 pt-5"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-white/50">Source</p><p className="mt-2 break-all text-sm">{domain}</p>{website ? <Link href={website} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] underline underline-offset-4">Visit resource <ExternalLink className="h-4 w-4" /></Link> : null}</div></div></header>
+      <div className="border-b border-[var(--tk-line)]"><div className="mx-auto grid max-w-[var(--editable-container)] divide-y divide-[var(--tk-line)] px-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8"><p className="py-5 text-xs"><span className="mr-2 font-bold uppercase tracking-[.14em] text-[var(--tk-muted)]">Collection</span>{collection}</p><p className="py-5 text-xs"><span className="mr-2 font-bold uppercase tracking-[.14em] text-[var(--tk-muted)]">Domain</span>{domain}</p><p className="py-5 text-xs"><span className="mr-2 font-bold uppercase tracking-[.14em] text-[var(--tk-muted)]">Status</span>Verified</p></div></div>
+      <section className="mx-auto grid max-w-[var(--editable-container)] gap-12 px-6 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_320px]"><article><p className="text-[10px] font-bold uppercase tracking-[.2em]">The note</p>{leadText(post) ? <p className="mt-5 max-w-2xl text-xl leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}<BodyContent post={post} /><div className="mt-10 flex flex-wrap gap-2">{[collection,...(post.tags||[])].filter(Boolean).slice(0,5).map(tag=><span key={tag} className="border border-[var(--tk-line)] px-3 py-1.5 text-xs">{tag}</span>)}</div></article><aside className="space-y-5 lg:sticky lg:top-24 lg:self-start"><div className="border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6"><Bookmark className="h-6 w-6"/><p className="mt-6 text-xs font-bold uppercase tracking-[.16em]">Saved resource</p><p className="mt-3 text-sm leading-6 text-[var(--tk-muted)]">A useful reference from the {collection.toLowerCase()} collection.</p>{website ? <Link href={website} target="_blank" rel="noreferrer" className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[.14em] text-white">Visit resource <ExternalLink className="h-4 w-4"/></Link> : null}</div><div className="border border-[var(--tk-line)] p-6"><p className="text-xs font-bold uppercase tracking-[.16em]">Why it is here</p><p className="mt-3 text-sm leading-6 text-[var(--tk-muted)]">Kept for clarity, usefulness, and the likelihood that it will still matter later.</p></div><Ads slot="sidebar" size={pickRandom(getSlotSizes('sidebar'))} showLabel /></aside></section>
+      {related.length ? <section className="border-t border-[var(--tk-line)]"><div className="mx-auto max-w-[var(--editable-container)] px-6 py-16 sm:px-8"><p className="text-[10px] font-bold uppercase tracking-[.2em]">More from this collection</p><div className="mt-7 grid gap-x-8 md:grid-cols-3">{related.slice(0,3).map((item)=><RelatedCard key={item.id||item.slug} task="sbm" post={item} grid={false} />)}</div></div></section> : null}
     </>
   )
 }
@@ -384,37 +378,12 @@ function PdfDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
 }
 
 // ----- Profile: identity-first with a sticky portrait -----
-function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
+function ProfileDetail({ post, related: _related }: { post: SitePost; related: SitePost[] }) {
   const images = getImages(post)
   const role = getField(post, ['role', 'designation', 'company', 'location'])
   const website = getField(post, ['website', 'url'])
   const email = getField(post, ['email'])
-  return (
-    <>
-      <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
-        <BackLink task="profile" />
-        <div className="mt-8 grid gap-10 lg:grid-cols-[360px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-8 text-center shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
-              <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-[var(--tk-line)] bg-[var(--tk-raised)]">
-                {images[0] ? <img src={images[0]} alt="" className="h-full w-full object-cover" /> : <UserRound className="h-14 w-14 text-[var(--tk-muted)]" />}
-              </div>
-              <h1 className="editable-display mt-6 text-2xl font-semibold tracking-[-0.02em]">{post.title}</h1>
-              {role ? <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-[var(--tk-accent)]">{role}</p> : null}
-              <DetailMeta post={post} center />
-              <ContactAction website={website} email={email} bare />
-            </div>
-          </aside>
-          <article className="min-w-0">
-            <Kicker task="profile">Profile</Kicker>
-            <BodyContent post={post} />
-            <ImageStrip images={images.slice(1)} label="Gallery" />
-          </article>
-        </div>
-      </section>
-      <RelatedStrip task="profile" related={related} />
-    </>
-  )
+  return <section><div className="h-48 bg-black sm:h-64" /><div className="mx-auto max-w-[var(--editable-container)] px-6 sm:px-8"><div className="-mt-20 flex h-40 w-40 items-center justify-center overflow-hidden rounded-full border-[6px] border-[var(--tk-bg)] bg-[var(--tk-surface)]">{images[0] ? <img src={images[0]} alt="" className="h-full w-full object-cover"/> : <UserRound className="h-14 w-14 text-[var(--tk-muted)]"/>}</div><div className="mt-7 border-b border-[var(--tk-line)] pb-10"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[var(--tk-muted)]">Member identity</p><h1 className="editable-display mt-4 text-5xl font-semibold tracking-[-.065em] sm:text-7xl">{post.title}</h1>{role?<p className="mt-4 text-sm font-medium text-[var(--tk-muted)]">{role}</p>:null}</div><div className="grid gap-12 py-14 lg:grid-cols-[minmax(0,1fr)_320px]"><article><p className="text-[10px] font-bold uppercase tracking-[.2em]">About</p><BodyContent post={post}/><div className="mt-14 border-t border-[var(--tk-line)] pt-8"><p className="text-[10px] font-bold uppercase tracking-[.2em]">Their content</p><h2 className="editable-display mt-4 text-3xl font-semibold tracking-[-.05em]">Work and notes, held in one place.</h2><p className="mt-4 max-w-xl text-sm leading-7 text-[var(--tk-muted)]">This member’s links, writing, and shared context appear here as they are added.</p></div></article><aside className="lg:sticky lg:top-24 lg:self-start"><div className="border border-[var(--tk-line)] bg-[var(--tk-raised)] p-6"><p className="text-[10px] font-bold uppercase tracking-[.2em]">Identity card</p><div className="mt-6 grid gap-4 text-sm">{role?<div><p className="text-[10px] uppercase tracking-[.16em] text-[var(--tk-muted)]">Role</p><p className="mt-1">{role}</p></div>:null}{website?<a href={website} target="_blank" rel="noreferrer" className="border-t border-[var(--tk-line)] pt-4 font-medium underline underline-offset-4">Visit website</a>:null}{email?<a href={`mailto:${email}`} className="border-t border-[var(--tk-line)] pt-4 font-medium underline underline-offset-4">Send a note</a>:null}</div></div></aside></div></div></section>
 }
 
 // ----- Shared building blocks -----
@@ -494,7 +463,7 @@ function BadgeLine({ label, value }: { label: string; value: string }) {
   )
 }
 
-function RelatedPanel({ task, post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
+function RelatedPanel({ task, post: _post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
   const taskConfig = getTaskConfig(task)
   return (
     <div className="space-y-6">
