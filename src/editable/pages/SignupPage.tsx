@@ -1,31 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowRight, Check } from 'lucide-react'
 import { buildPageMetadata } from '@/lib/seo'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { EditableLocalSignupForm } from '@/editable/components/EditableLocalAuthForms'
 import { pagesContent } from '@/editable/content/pages.content'
-
-export async function generateMetadata(): Promise<Metadata> {
-  return buildPageMetadata({ path: '/signup', title: 'Sign up', description: pagesContent.auth.signup.metadataDescription })
-}
-
-export default function SignupPage() {
-  return (
-    <EditableSiteShell>
-      <main className="bg-[var(--slot4-panel-bg)] text-[var(--slot4-page-text)]">
-        <section className="mx-auto grid min-h-[calc(100vh-12rem)] max-w-[var(--editable-container)] items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1fr] lg:px-8">
-          <div className="rounded-2xl border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-7 shadow-[0_4px_24px_rgba(0,0,0,0.08)] sm:p-9">
-            <h1 className="text-2xl font-bold tracking-[-0.01em]">{pagesContent.auth.signup.formTitle}</h1>
-            <EditableLocalSignupForm />
-            <p className="mt-6 text-sm text-[var(--slot4-muted-text)]">Already have an account? <Link href="/login" className="font-semibold text-[var(--slot4-accent)] underline-offset-4 hover:underline">{pagesContent.auth.signup.loginCta}</Link></p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--slot4-accent)]">{pagesContent.auth.signup.badge}</p>
-            <h2 className="mt-4 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl">{pagesContent.auth.signup.title}</h2>
-            <p className="mt-5 max-w-lg text-base leading-7 text-[var(--slot4-muted-text)]">{pagesContent.auth.signup.description}</p>
-          </div>
-        </section>
-      </main>
-    </EditableSiteShell>
-  )
-}
+export async function generateMetadata(): Promise<Metadata> { return buildPageMetadata({ path:'/signup', title:'Sign up', description:pagesContent.auth.signup.metadataDescription }) }
+export default function SignupPage(){return <EditableSiteShell><main className="min-h-screen bg-[var(--slot4-page-bg)]"><section className="mx-auto grid min-h-[calc(100vh-76px)] max-w-[var(--editable-container)] lg:grid-cols-[.9fr_1.1fr]"><div className="order-2 flex border-t border-[var(--editable-border)] p-6 sm:p-10 lg:order-1 lg:border-r lg:border-t-0 lg:p-16"><div className="my-auto w-full max-w-md"><p className="text-[10px] font-bold uppercase tracking-[.22em]">Join the index</p><h1 className="editable-display mt-4 text-3xl font-semibold tracking-[-.05em]">Make room for good finds.</h1><EditableLocalSignupForm/><p className="mt-8 border-t border-[var(--editable-border)] pt-5 text-sm text-[var(--slot4-muted-text)]">Already a member? <Link href="/login" className="font-bold text-black underline underline-offset-4">Sign in <ArrowRight className="inline h-3.5 w-3.5"/></Link></p></div></div><div className="order-1 flex bg-black p-6 text-white sm:p-10 lg:order-2 lg:p-16"><div className="my-auto max-w-xl"><p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/55">Collections · Members</p><h2 className="editable-display mt-7 text-5xl font-semibold leading-[.9] tracking-[-.065em] sm:text-7xl">Keep the links that shape your work.</h2><div className="mt-10 space-y-4 text-sm leading-6 text-white/70">{['Submit resources worth returning to','Keep your contributions in one calm place','Help the catalogue become more useful'].map(item=><p key={item} className="flex gap-3"><Check className="h-4 w-4 shrink-0 text-white"/>{item}</p>)}</div></div></div></section></main></EditableSiteShell>}

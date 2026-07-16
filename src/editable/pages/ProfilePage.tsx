@@ -1,7 +1,6 @@
 import { EditableTaskArchiveRoute, taskMetadata } from '@/editable/pages/TaskArchivePage'
 
 export const revalidate = 3
-
 export const generateMetadata = () => taskMetadata('profile', '/profile')
 
 export async function ProfilePageTaskPage({
@@ -15,5 +14,4 @@ export async function ProfilePageTaskPage({
 }
 
 export default ProfilePageTaskPage
-
 export const ProfileTaskPage = ProfilePageTaskPage
