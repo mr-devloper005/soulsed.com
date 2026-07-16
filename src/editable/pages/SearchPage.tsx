@@ -10,6 +10,8 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { toPlainText } from '@/editable/cards/PostCards'
 import { pagesContent } from '@/editable/content/pages.content'
+import { isUiHiddenTask } from '@/editable/content/global.content'
+import { Ads, getSlotSizes } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -31,6 +33,7 @@ const getImage = (post: SitePost) => {
   return media || compactRaw(content.featuredImage) || compactRaw(content.image) || compactRaw(content.thumbnail) || images || ''
 }
 const compactRaw = (value: unknown) => typeof value === 'string' ? value.trim() : ''
+const pickRandom = (sizes: string[]) => sizes[Math.floor(Math.random() * sizes.length)]
 const summaryOf = (post: SitePost) => {
   const content = getContent(post)
   // compactRaw only trims — it does NOT strip HTML — so the raw payload could leak markup
@@ -71,7 +74,7 @@ function SearchResultCard({ post, index }: { post: SitePost; index: number }) {
   const strong = index % 5 === 0
 
   return (
-    <Link href={href} className={`group block overflow-hidden rounded-[2rem] border border-[var(--editable-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl ${strong ? 'md:col-span-2' : ''}`}>
+    <Link href={href} className={`group block overflow-hidden border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] transition hover:-translate-y-1 ${strong ? 'md:col-span-2' : ''}`}>
       {image ? (
         <div className={`relative overflow-hidden bg-black ${strong ? 'aspect-[16/7]' : 'aspect-[16/10]'}`}>
           <img src={image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
@@ -98,14 +101,14 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
   const useMaster = resolved.master !== '0'
   const feed = await fetchSiteFeed(useMaster ? 1000 : 300, useMaster ? { fresh: true, category: category || undefined, task: task || undefined } : undefined)
   const posts = feed?.posts?.length ? feed.posts : useMaster ? [] : SITE_CONFIG.tasks.filter((item) => item.enabled).flatMap((item) => getMockPostsForTask(item.key))
-  const results = posts.filter((post) => matches(post, normalized, category, task)).slice(0, normalized ? 80 : 36)
-  const enabledTasks = SITE_CONFIG.tasks.filter((item) => item.enabled)
+  const results = posts.filter((post) => !isUiHiddenTask(getPostTaskKey(post) || '') && matches(post, normalized, category, task)).slice(0, normalized ? 80 : 36)
+  const enabledTasks = SITE_CONFIG.tasks.filter((item) => item.enabled && !isUiHiddenTask(item.key))
 
   return (
     <EditableSiteShell>
-      <main className="min-h-screen bg-[var(--editable-page-bg,#fff7ee)] text-[var(--editable-page-text,#2f1d16)]">
+      <main className="min-h-screen bg-[var(--slot4-page-bg)] text-[var(--slot4-page-text)]">
         <section className="mx-auto max-w-[var(--editable-container)] px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-          <div className="grid gap-8 rounded-[2.5rem] border border-[var(--editable-border)] bg-white/70 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur md:grid-cols-[0.8fr_1.2fr] lg:p-10">
+          <div className="grid gap-8 border-b border-[var(--editable-border)] pb-12 md:grid-cols-[0.8fr_1.2fr] lg:pb-16">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.28em] opacity-55">{pagesContent.search.hero.badge}</p>
               <h1 className="mt-5 text-5xl font-black leading-[0.92] tracking-[-0.08em] sm:text-7xl">{pagesContent.search.hero.title}</h1>
@@ -149,6 +152,7 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
               <p className="mt-3 text-sm font-semibold opacity-60">Try a different keyword, task type, or category.</p>
             </div>
           )}
+          <div className="mt-12 border-t border-[var(--editable-border)] pt-8"><Ads slot="footer" size={pickRandom(getSlotSizes('footer'))} showLabel /></div>
         </section>
       </main>
     </EditableSiteShell>
